@@ -36,4 +36,15 @@ abstract class Observable<T>: ObservableSource<T> {
      */
     abstract fun subscribeActual(source: Observer<T>)
 
+    /**
+     *
+     */
+    fun subscribeOn(scheduler: Scheduler) {
+
+    }
+
+    fun observerOn(actual: Observer<T>) {
+
+    }
+
 }
