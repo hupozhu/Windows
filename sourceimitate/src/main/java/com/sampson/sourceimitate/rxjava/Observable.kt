@@ -1,6 +1,6 @@
 package com.sampson.sourceimitate.rxjava
 
-import java.util.function.Function
+import io.reactivex.rxjava3.functions.Function
 
 /**
  * 被观察着
@@ -20,5 +20,9 @@ abstract class Observable<T>: ObservableSource<T> {
         return ObservableMap(this, mapper)
     }
 
+    final override fun subscribe(source: Observer<T>) {
+        subscribeActual(source)
+    }
 
+    abstract fun subscribeActual(source: Observer<T>)
 }
