@@ -13,7 +13,7 @@ class IoScheduler : Scheduler {
         )
     }
 
-    fun scheduleDirect(runnable: Runnable) {
+    override fun scheduleDirect(runnable: Runnable) {
         executor.schedule(runnable, 0, TimeUnit.SECONDS)
     }
 

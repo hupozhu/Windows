@@ -4,5 +4,4 @@ interface Observer<T> {
 
     fun onNext(t: T)
 
-    fun onComplete()
 }

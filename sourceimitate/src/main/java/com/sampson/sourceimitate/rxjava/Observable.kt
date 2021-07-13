@@ -37,14 +37,17 @@ abstract class Observable<T>: ObservableSource<T> {
     abstract fun subscribeActual(source: Observer<T>)
 
     /**
-     *
+     * 2.1 调度到其他场景中订阅
      */
-    fun subscribeOn(scheduler: IoScheduler) {
-
+    fun subscribeOn(scheduler: Scheduler): Observable<T>  {
+        return ObservableSubscribeOn(this, scheduler)
     }
 
-    fun observerOn(actual: Observer<T>) {
-
+    /**
+     *  2.3 调度到其他场景中观察
+     */
+    fun observerOn(scheduler: Scheduler): Observable<T>  {
+        return ObservableObserveOn(this, scheduler)
     }
 
 }

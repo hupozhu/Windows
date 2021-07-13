@@ -22,7 +22,7 @@ class ObservableCreate<T>(private val subscribe: ObservableOnSubscribe<T>) : Obs
             /**
              * 11、调用MapObserver的onNext
              */
-            override fun onNext(e: T) {
+            override fun onNext(e: T) { // e -> shein
                 observer.onNext(e)
             }
 
