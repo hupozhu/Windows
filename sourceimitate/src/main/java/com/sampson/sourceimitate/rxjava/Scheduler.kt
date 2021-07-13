@@ -1,9 +1,7 @@
 package com.sampson.sourceimitate.rxjava
 
-class Scheduler {
+interface Scheduler {
 
-    fun scheduleDirect(runnable: Runnable) {
 
-    }
 
 }

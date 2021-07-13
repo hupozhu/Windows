@@ -39,7 +39,7 @@ abstract class Observable<T>: ObservableSource<T> {
     /**
      *
      */
-    fun subscribeOn(scheduler: Scheduler) {
+    fun subscribeOn(scheduler: IoScheduler) {
 
     }
 

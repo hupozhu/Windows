@@ -1,26 +1,16 @@
 package com.sampson.sourceimitate.rxjava
 
-class ObservableSubscribeOn<T>(val source: Observable<T>, val scheduler: Scheduler): Observable<T>() {
-
+class ObservableSubscribeOn<T>(val source: Observable<T>, val scheduler: IoScheduler): Observable<T>() {
 
     override fun subscribeActual(sourceObserver: Observer<T>) {
-        val parent = SubscribeOnObserver(sourceObserver)
-        scheduler.scheduleDirect(SubscribeTask(parent))
+        scheduler.scheduleDirect(SubscribeTask(sourceObserver))
     }
 
-    class SubscribeOnObserver<T>(val source: Observer<T>): Observer<T> {
 
-        override fun onComplete() {
-        }
-
-        override fun onNext(t: T) {
-        }
-
-    }
-
-    internal class SubscribeTask<T>(val sourceObservable: SubscribeOnObserver<T>): Runnable {
+    inner class SubscribeTask(private val sourceObservable: Observer<T>): Runnable {
 
         override fun run() {
+            source.subscribe(this.sourceObservable)
         }
 
     }
