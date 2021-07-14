@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun customRxFunction() {
         Observable
-            .create(object : ObservableOnSubscribe<String> {
+            .create(object : ObservableOnSubscribe<String> { // 媒人，七大姑八大姨。约一个局
                 override fun subscribe(emitter: ObservableEmitter<String>) {
                     emitter.onNext("xxx")
                 }
