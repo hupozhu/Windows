@@ -3,7 +3,7 @@ package com.sampson.sourceimitate.rxjava
 import io.reactivex.rxjava3.functions.Function
 
 /**
- * 被观察着
+ * 被观察者
  */
 abstract class Observable<T>: ObservableSource<T> {
 
@@ -13,7 +13,6 @@ abstract class Observable<T>: ObservableSource<T> {
          * 2、接收一个ObservableOnSubscribe对象，以在订阅发生时，处理相关逻辑。
          */
         fun <T> create(subscribe: ObservableOnSubscribe<T>): Observable<T> {
-            // 1、男主小明出场，有媒人坐镇，胸有成竹
             return ObservableCreate(subscribe)
         }
     }
@@ -22,14 +21,12 @@ abstract class Observable<T>: ObservableSource<T> {
      * 3、创建一个Observable对象，并传入上层事件的Observable对象，和处理方法。
      */
     fun <R> map(mapper: Function<T, R>): Observable<R> {
-        // 2、包装人设：海归，IT精英。
         return ObservableMap(this, mapper)
     }
 
     /**
      * 4、发生订阅，最终事件流中的subscribeActual方法
      */
-    // 3-开始组局约小芳
     final override fun subscribe(source: Observer<T>) {
         subscribeActual(source)
     }
@@ -49,7 +46,7 @@ abstract class Observable<T>: ObservableSource<T> {
     /**
      *  2.3 调度到其他场景中观察
      */
-    fun observerOn(scheduler: Scheduler): Observable<T>  {
+        fun observerOn(scheduler: Scheduler): Observable<T>  {
         return ObservableObserveOn(this, scheduler)
     }
 

@@ -13,7 +13,6 @@ class ObservableCreate<T>(private val subscribe: ObservableOnSubscribe<T>) : Obs
          * 9、创建CreateEmitter对象
          * 10、将CreateEmitter叫由创建时ObservableOnSubscribe发起订阅。
          */
-        // 小明本明，找媒人组局，并且准备了一套开场白来打动小芳
         subscribe.subscribe(CreateEmitter(source))
     }
 
