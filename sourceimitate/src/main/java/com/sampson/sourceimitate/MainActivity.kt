@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
         Observable
             .create(object : ObservableOnSubscribe<String> {
                 override fun subscribe(emitter: ObservableEmitter<String>) {
-                    emitter.onNext("shein")
+                    emitter.onNext("xxx")
                 }
             })
             .map(Function<String, String> {
