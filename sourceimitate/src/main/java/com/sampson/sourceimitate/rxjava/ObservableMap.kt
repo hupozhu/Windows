@@ -9,7 +9,6 @@ class ObservableMap<T, R>(private val source: Observable<T>, private val mapper:
          * 6、创建MapObserver对象，并传入订阅的Observer。
          * 7、交给上层的subscribeActual方法，即ObservableCreate对象。
          */
-        // 小明以IT精英的标签来相亲来提高成功率，那小芳也要拿出自己一套对IT精英的标准来评判。
         this.source.subscribeActual(MapObserver(source, mapper))
     }
 
