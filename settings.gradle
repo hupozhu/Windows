@@ -1,3 +1,4 @@
 rootProject.name = "Windows"
 include ':app'
 include ':sourceimitate'
+include ':gitrepomanager'

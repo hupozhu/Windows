@@ -1,0 +1,19 @@
+plugins {
+    id 'groovy'
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+dependencies {
+    implementation gradleApi()
+}
+
+task test1 {
+    println("===" + rootProject.allprojects)
+    println("===" + rootProject.childProjects)
+    println("===" + rootDir)
+}
+
