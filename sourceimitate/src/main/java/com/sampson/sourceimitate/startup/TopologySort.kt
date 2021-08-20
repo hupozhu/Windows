@@ -3,12 +3,12 @@ package com.sampson.sourceimitate.startup
 import com.sampson.sourceimitate.startup.task.StartupTask
 import java.util.*
 
-
+/**
+ * 针对启动列表进行拓扑排序
+ */
 object TopologySort {
 
     fun sort(startupList: List<StartupTask>): StartupTaskStore {
-
-
         val mainResult = mutableListOf<StartupTask>()
         val ioResult = mutableListOf<StartupTask>()
         val temp = mutableListOf<StartupTask>()
@@ -72,13 +72,11 @@ object TopologySort {
             addAll(mainResult)
         }
 
-
         return StartupTaskStore(
             result,
             startupMap,
             startupChildrenMap
         )
-
     }
 
 }

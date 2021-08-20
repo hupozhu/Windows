@@ -1,10 +1,13 @@
 package com.sampson.sourceimitate.startup
 
 import com.sampson.sourceimitate.startup.task.StartupTask
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
 
-class StartupManager(val readStartupList: List<StartupTask>, private val waitTaskCount: AtomicInteger) {
+class StartupManager(
+    private val readStartupList: List<StartupTask>,
+    private val waitTaskCount: AtomicInteger
+) {
 
     private var mAwaitCountDownLatch: CountDownLatch? = null
 
@@ -12,7 +15,13 @@ class StartupManager(val readStartupList: List<StartupTask>, private val waitTas
         mAwaitCountDownLatch = CountDownLatch(waitTaskCount.get())
 
         TopologySort.sort(readStartupList).run {
+            dispatchStartTask(this)
+        }
+    }
 
+    private fun dispatchStartTask(tasks: StartupTaskStore) {
+        tasks.result.forEach {
+            StartupManagerDispatcher.instance.dispatch(it, tasks)
         }
     }
 
@@ -21,17 +30,23 @@ class StartupManager(val readStartupList: List<StartupTask>, private val waitTas
         private var startupList = mutableListOf<StartupTask>()
         private var needCountDown = AtomicInteger()
 
-        fun addStartup(task: StartupTask) {
+        fun addStartup(task: StartupTask): Builder {
             startupList.add(task)
+            return this
         }
 
-        fun build() {
+        fun setDispatcher(dispatcher: Executor): Builder {
+            StartupManagerDispatcher.instance.taskDispatcher = dispatcher
+            return this
+        }
+
+        fun build(): StartupManager {
             startupList.forEach { task ->
                 if (!task.processOnMainThread()) {
                     needCountDown.incrementAndGet()
                 }
             }
-            StartupManager(startupList, needCountDown)
+            return StartupManager(startupList, needCountDown)
         }
 
     }
