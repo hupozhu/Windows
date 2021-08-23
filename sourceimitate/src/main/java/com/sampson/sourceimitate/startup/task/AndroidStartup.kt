@@ -14,15 +14,20 @@ abstract class AndroidStartup : StartupTask {
     private var mTaskCompleted = AtomicBoolean(true)
 
     override fun waitDependency() {
-        mDependencyCountDown.await()
+        try {
+            mDependencyCountDown.await()
+        } catch (e: InterruptedException) {
+            e.printStackTrace()
+        }
     }
 
     override fun dependencyComplete(dependency: StartupTask, result: Any?) {
         mDependencyCountDown.countDown()
     }
 
-    override fun create() {
+    override fun create(): Any? {
         mTaskCompleted.set(false)
+        return createTask()
     }
 
     override fun onComplete(result: Any?) {
@@ -46,4 +51,6 @@ abstract class AndroidStartup : StartupTask {
             mFutureObserver.add(futureObserver)
         }
     }
+
+    abstract fun createTask(): Any?
 }

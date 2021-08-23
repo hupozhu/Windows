@@ -3,9 +3,9 @@ package com.sampson.sourceimitate.startup.task
 
 interface StartupTask {
 
-    fun processOnMainThread() = false
+    fun processOnMainThread(): Boolean
 
-    fun create()
+    fun create(): Any?
 
     fun onComplete(result: Any?)
 

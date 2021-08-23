@@ -1,6 +1,6 @@
 package com.sampson.sourceimitate.startup.task
 
-import com.sampson.sourceimitate.startup.StartupManagerDispatcher
+import com.sampson.sourceimitate.startup.StartupManager
 import java.util.concurrent.Executor
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.ThreadPoolExecutor
@@ -11,7 +11,7 @@ class ThreadPoolExecutorDelegate {
 
     private lateinit var threadPoolExecutor: Executor
 
-    operator fun getValue(thisRef: StartupManagerDispatcher, property: KProperty<*>): Executor {
+    operator fun getValue(thisRef: StartupManager, property: KProperty<*>): Executor {
         if (!this::threadPoolExecutor.isInitialized) {
             val cpuCount = Runtime.getRuntime().availableProcessors()
             threadPoolExecutor = ThreadPoolExecutor(
@@ -25,7 +25,7 @@ class ThreadPoolExecutorDelegate {
         return threadPoolExecutor
     }
 
-    operator fun setValue(thisRef: StartupManagerDispatcher, property: KProperty<*>, value: Executor) {
+    operator fun setValue(thisRef: StartupManager, property: KProperty<*>, value: Executor) {
         threadPoolExecutor = value
     }
 }

@@ -22,6 +22,10 @@ class MainActivity : AppCompatActivity() {
         customRxFunction()
     }
 
+    private fun useOkHttp() {
+
+    }
+
     private fun customRxFunction() {
 //        Observable
 //            .create(object : ObservableOnSubscribe<String> {
@@ -77,4 +81,6 @@ class MainActivity : AppCompatActivity() {
             .start()
             .await()
     }
+
+
 }

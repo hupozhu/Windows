@@ -1,12 +1,12 @@
 package com.sampson.sourceimitate.startup.task
 
-import com.sampson.sourceimitate.startup.StartupManagerDispatcher
+import com.sampson.sourceimitate.startup.StartupManager
 import com.sampson.sourceimitate.startup.StartupTaskStore
 
 class StartupRunnable(
     private val startup: StartupTask,
     private val taskStore: StartupTaskStore,
-    private val dispatcher: StartupManagerDispatcher
+    private val dispatcher: StartupManager
 ) : Runnable {
 
     override fun run() {

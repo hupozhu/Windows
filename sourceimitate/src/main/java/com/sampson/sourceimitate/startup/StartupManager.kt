@@ -1,53 +1,47 @@
 package com.sampson.sourceimitate.startup
 
+import com.sampson.sourceimitate.startup.task.StartupRunnable
 import com.sampson.sourceimitate.startup.task.StartupTask
-import java.util.concurrent.*
-import java.util.concurrent.atomic.AtomicInteger
+import com.sampson.sourceimitate.startup.task.TaskFutureObserver
+import com.sampson.sourceimitate.startup.task.ThreadPoolExecutorDelegate
+import java.util.concurrent.Executor
 
-class StartupManager(
-    private val readStartupList: List<StartupTask>,
-    private val waitTaskCount: AtomicInteger
-) {
+class StartupManager private constructor() {
 
-    private var mAwaitCountDownLatch: CountDownLatch? = null
+    companion object {
+        val INSTANCE: StartupManager by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { StartupManager() }
+    }
 
-    fun start() {
-        mAwaitCountDownLatch = CountDownLatch(waitTaskCount.get())
+    internal var taskDispatcher: Executor by ThreadPoolExecutorDelegate()
+    internal var taskCaches = mutableMapOf<Class<out StartupTask>, Any?>()
+    internal lateinit var taskStore: StartupTaskStore
 
-        TopologySort.sort(readStartupList).run {
-            dispatchStartTask(this)
+    fun awaitTask(startupTask: Class<StartupTask>, futureObserver: TaskFutureObserver? = null) {
+        if (this::taskStore.isInitialized) {
+            taskStore.startupMap[startupTask.getUniqueKey()]?.waitCurrentTask(futureObserver)
         }
     }
 
-    private fun dispatchStartTask(tasks: StartupTaskStore) {
-        tasks.result.forEach {
-            StartupManagerDispatcher.instance.dispatch(it, tasks)
-        }
-    }
-
-    class Builder {
-
-        private var startupList = mutableListOf<StartupTask>()
-        private var needCountDown = AtomicInteger()
-
-        fun addStartup(task: StartupTask): Builder {
-            startupList.add(task)
-            return this
-        }
-
-        fun setDispatcher(dispatcher: Executor): Builder {
-            StartupManagerDispatcher.instance.taskDispatcher = dispatcher
-            return this
-        }
-
-        fun build(): StartupManager {
-            startupList.forEach { task ->
-                if (!task.processOnMainThread()) {
-                    needCountDown.incrementAndGet()
-                }
+    internal fun dispatch(task: StartupTask, store: StartupTaskStore) {
+        if (taskCaches.containsKey(task.javaClass)) {
+            val result = taskCaches[task.javaClass]
+            notifyDependency(task, result, store)
+        } else {
+            val taskRunnable = StartupRunnable(task, store, this)
+            // 如果task需要在主线程运行，直接调用run方法。如果是在子线程中运行，则通过dispatcher调度到线程池
+            if (task.processOnMainThread()) {
+                taskRunnable.run()
+            } else {
+                taskDispatcher.execute(taskRunnable)
             }
-            return StartupManager(startupList, needCountDown)
         }
-
     }
+
+    internal fun notifyDependency(task: StartupTask, result: Any?, sortStore: StartupTaskStore) {
+        // 找到依赖了task的子task，通知其子task依赖完成
+        sortStore.startupChildrenMap[task.javaClass.getUniqueKey()]?.forEach {
+            sortStore.startupMap[it]?.dependencyComplete(task, result)
+        }
+    }
+
 }
