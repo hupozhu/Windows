@@ -4,13 +4,13 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven { url 'http://10.102.156.17:8082/artifactory/virtual_repo/' }
+        maven { url 'http://10.102.156.17:8082/artifactory/virtual_snapshots/' }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:3.6.3"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.24.16"
     }
 }
 
@@ -19,6 +19,8 @@ allprojects {
         google()
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
+        maven { url 'http://10.102.156.17:8082/artifactory/virtual_repo/' }
+        maven { url 'http://10.102.156.17:8082/artifactory/virtual_snapshots/' }
     }
 }
 

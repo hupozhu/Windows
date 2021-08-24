@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
+    id 'com.jfrog.artifactory'
+    id 'maven-publish'
 }
 
 android {
@@ -47,4 +49,43 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+}
+
+def MAVEN_LOCAL_PATH = "http://10.102.156.17:8082/artifactory/"
+def ARTIFACT_ID = "startup"
+def VERSION_NAME = '0.0.1-SNAPSHOTS'
+def GROUP_ID = project.getName()
+
+publishing {    //这段语句，是生成pom文件的task
+    publications {
+        aarPub(MavenPublication) {
+            groupId GROUP_ID
+            version = VERSION_NAME
+            artifactId ARTIFACT_ID
+            // 这里获得aar 生成的位置和上传
+            artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+
+            pom.withXml {
+                def dependencies = asNode().appendNode("dependencies")
+                configurations.api.allDependencies.each {
+                    def dependency = dependencies.appendNode("dependency")
+                    dependency.appendNode("groupId", it.group)
+                    dependency.appendNode("artifactId", it.name)
+                    dependency.appendNode("version", it.version)
+                    //自己使用的一个第三方库
+                    if (it.group == "org.linphone") {
+                        dependency.appendNode("type", "aar")
+                    }
+                }
+            }
+        }
+    }
+}
+
+artifactoryPublish {
+    contextUrl = MAVEN_LOCAL_PATH
+    publications("aarPub")
+    clientConfig.publisher.repoKey = "local_maven_snapshot"
+    clientConfig.publisher.username = "admin"
+    clientConfig.publisher.password = "password"
 }
