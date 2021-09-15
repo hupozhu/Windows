@@ -32,6 +32,8 @@ class MyApplication : Application() {
             return null
         }
 
+        override fun waitInAppOnCreate(): Boolean = true
+
         override fun processOnMainThread(): Boolean = false
 
         override fun dependencies(): List<Class<out StartupTask>>? = null
@@ -46,11 +48,11 @@ class MyApplication : Application() {
             return null
         }
 
-        override fun processOnMainThread(): Boolean {
-            return true
-        }
+        override fun waitInAppOnCreate(): Boolean = true
 
-        override fun dependencies(): List<Class<out StartupTask>>? {
+        override fun processOnMainThread(): Boolean = true
+
+        override fun dependencies(): List<Class<out StartupTask>> {
             return listOf(TestStartup1::class.java)
         }
 

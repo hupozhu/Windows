@@ -4,17 +4,16 @@ import com.sampson.sourceimitate.startup.task.StartupRunnable
 import com.sampson.sourceimitate.startup.task.StartupTask
 import com.sampson.sourceimitate.startup.task.TaskFutureObserver
 import com.sampson.sourceimitate.startup.task.ThreadPoolExecutorDelegate
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
 
-class StartupManager private constructor() {
+class StartupManager() {
 
-    companion object {
-        val INSTANCE: StartupManager by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { StartupManager() }
-    }
-
-    internal var taskDispatcher: Executor by ThreadPoolExecutorDelegate()
-    internal var taskCaches = mutableMapOf<Class<out StartupTask>, Any?>()
-    internal lateinit var taskStore: StartupTaskStore
+    lateinit var taskStore: StartupTaskStore
+    var taskCaches = mutableMapOf<Class<out StartupTask>, Any?>()
+    var taskDispatcher: Executor by ThreadPoolExecutorDelegate()
+    var timeRecord: StartupCostTimeRecord? = null
+    var mainCountDownLaunch: CountDownLatch? = null
 
     fun awaitTask(startupTask: Class<StartupTask>, futureObserver: TaskFutureObserver? = null) {
         if (this::taskStore.isInitialized) {
@@ -38,6 +37,9 @@ class StartupManager private constructor() {
     }
 
     internal fun notifyDependency(task: StartupTask, result: Any?, sortStore: StartupTaskStore) {
+        if (!task.processOnMainThread() && task.waitInAppOnCreate()) {
+            mainCountDownLaunch?.countDown()
+        }
         // 找到依赖了task的子task，通知其子task依赖完成
         sortStore.startupChildrenMap[task.javaClass.getUniqueKey()]?.forEach {
             sortStore.startupMap[it]?.dependencyComplete(task, result)

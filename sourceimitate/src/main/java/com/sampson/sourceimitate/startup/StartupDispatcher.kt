@@ -6,17 +6,30 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class StartupDispatcher(
     private val readStartupList: List<StartupTask>,
-    private val waitTaskCount: AtomicInteger
+    private val waitTaskCount: AtomicInteger,
+    private val dispatcher: Executor?
 ) {
 
     private var mAwaitCountDownLatch: CountDownLatch? = null
+    private val mTimeRecord: StartupCostTimeRecord = StartupCostTimeRecord()
+    private val startupManager = StartupManager()
+
+    init {
+        startupManager.apply {
+            this.timeRecord = mTimeRecord
+            if (dispatcher != null) {
+                this.taskDispatcher = dispatcher
+            }
+        }
+    }
 
     fun start(): StartupDispatcher {
+        mTimeRecord.startTrace()
         mAwaitCountDownLatch = CountDownLatch(waitTaskCount.get())
+        startupManager.mainCountDownLaunch = mAwaitCountDownLatch
 
         TopologySort.sort(readStartupList).run {
-            StartupManager.INSTANCE.taskStore = this
-
+            startupManager.taskStore = this
             dispatchStartTask(this)
         }
         return this
@@ -24,15 +37,17 @@ class StartupDispatcher(
 
     fun await() {
         try {
-            mAwaitCountDownLatch?.await()
+            mAwaitCountDownLatch?.await(10, TimeUnit.SECONDS)
         } catch (e: InterruptedException) {
             e.printStackTrace()
+        } finally {
+            mTimeRecord.endTrace()
         }
     }
 
     private fun dispatchStartTask(tasks: StartupTaskStore) {
         tasks.result.forEach {
-            StartupManager.INSTANCE.dispatch(it, tasks)
+            startupManager.dispatch(it, tasks)
         }
     }
 
@@ -40,6 +55,7 @@ class StartupDispatcher(
 
         private var startupList = mutableListOf<StartupTask>()
         private var needCountDown = AtomicInteger()
+        private var dispatcher: Executor? = null
 
         fun addStartup(task: StartupTask): Builder {
             startupList.add(task)
@@ -47,17 +63,17 @@ class StartupDispatcher(
         }
 
         fun setExecutor(dispatcher: Executor): Builder {
-            StartupManager.INSTANCE.taskDispatcher = dispatcher
+            this.dispatcher = dispatcher
             return this
         }
 
         fun build(): StartupDispatcher {
             startupList.forEach { task ->
-                if (!task.processOnMainThread()) {
+                if (!task.processOnMainThread() && task.waitInAppOnCreate()) {
                     needCountDown.incrementAndGet()
                 }
             }
-            return StartupDispatcher(startupList, needCountDown)
+            return StartupDispatcher(startupList, needCountDown, dispatcher)
         }
 
     }

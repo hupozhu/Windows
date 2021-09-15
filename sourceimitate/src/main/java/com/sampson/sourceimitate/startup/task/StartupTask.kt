@@ -3,6 +3,8 @@ package com.sampson.sourceimitate.startup.task
 
 interface StartupTask {
 
+    fun waitInAppOnCreate(): Boolean
+
     fun processOnMainThread(): Boolean
 
     fun create(): Any?

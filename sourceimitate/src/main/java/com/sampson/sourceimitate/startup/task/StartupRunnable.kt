@@ -13,7 +13,9 @@ class StartupRunnable(
         // 1、等待依赖的任务执行完成
         startup.waitDependency()
         // 2、执行任务获取结果
+        dispatcher.timeRecord?.startOneTaskTrace(startup)
         val result = startup.create()
+        dispatcher.timeRecord?.endOneTaskTrace(startup)
         // 3、将执行结果存入缓存
         dispatcher.taskCaches[startup.javaClass] = result
         // 4、通知被其依赖的任务
